@@ -1,6 +1,7 @@
 package kata.supermarket;
 
 import kata.supermarket.offers.BuyOneGetOne;
+import kata.supermarket.offers.BuyTwoForOnePound;
 import kata.supermarket.offers.Offer;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -33,18 +34,29 @@ class BasketTest {
                 multipleItemsPricedPerUnit(),
                 aSingleItemPricedByWeight(),
                 multipleItemsPricedByWeight(),
-                fiveItemsPricedPerUnit()
+                fiveItemsPricedPerUnit(),
+                twoForOnePoundItems()
         );
     }
 
-    private static Arguments fiveItemsPricedPerUnit() {
-        return Arguments.of("5 items, 4 pint of milk along with digestive", "2.53", Arrays.asList(aPintOfMilk("milk"),
-                aPintOfMilk("milk"), aPintOfMilk("milk"), aPintOfMilk("milk"),
-                aPackOfDigestives("digestive")), Collections.singleton(buyOneGetOnePintOfMilk()));
+    private static Arguments twoForOnePoundItems() {
+        return Arguments.of("one pound items", "3.55", Arrays.asList(aPintOfMilk("milk", "2.49"),
+                aPintOfMilk("milk", "2.49"), aPintOfMilk("milk", "2.49"), aPintOfMilk("milk", "2.49"),
+                aPackOfDigestives("digestive", "1.55")), Collections.singleton(buyTwoForOnePoundMilk("2.49")));
     }
 
-    private static Offer buyOneGetOnePintOfMilk() {
-        return new BuyOneGetOne(new Product(new BigDecimal("0.49"), "milk").oneOf());
+    private static Arguments fiveItemsPricedPerUnit() {
+        return Arguments.of("5 items, 4 pint of milk along with digestive", "2.43", Arrays.asList(aPintOfMilk("milk", "0.45"),
+                aPintOfMilk("milk", "0.45"), aPintOfMilk("milk", "0.45"), aPintOfMilk("milk", "0.45"),
+                aPackOfDigestives("digestive", "1.53")), Collections.singleton(buyOneGetOnePintOfMilk("0.45")));
+    }
+
+    private static Offer buyOneGetOnePintOfMilk(String price) {
+        return new BuyOneGetOne(new Product(new BigDecimal(price), "milk").oneOf());
+    }
+
+    private static Offer buyTwoForOnePoundMilk(String price) {
+        return new BuyTwoForOnePound(new Product(new BigDecimal(price), "milk").oneOf());
     }
 
     private static Arguments aSingleItemPricedByWeight() {
@@ -75,16 +87,16 @@ class BasketTest {
         return new Product(new BigDecimal("0.49")).oneOf();
     }
 
-    private static Item aPintOfMilk(String name) {
-        return new Product(new BigDecimal("0.49"), name).oneOf();
+    private static Item aPintOfMilk(String name, String price) {
+        return new Product(new BigDecimal(price), name).oneOf();
     }
 
     private static Item aPackOfDigestives() {
         return new Product(new BigDecimal("1.55")).oneOf();
     }
 
-    private static Item aPackOfDigestives(String name) {
-        return new Product(new BigDecimal("1.55"), name).oneOf();
+    private static Item aPackOfDigestives(String name, String price) {
+        return new Product(new BigDecimal(price), name).oneOf();
     }
 
     private static WeighedProduct aKiloOfAmericanSweets() {
