@@ -1,5 +1,7 @@
 package kata.supermarket;
 
+import kata.supermarket.offers.BuyOneGetOne;
+import kata.supermarket.offers.Offer;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
@@ -17,9 +19,10 @@ class BasketTest {
     @DisplayName("basket provides its total value when containing...")
     @MethodSource
     @ParameterizedTest(name = "{0}")
-    void basketProvidesTotalValue(String description, String expectedTotal, Iterable<Item> items) {
+    void basketProvidesTotalValue(String description, String expectedTotal, Iterable<Item> items, Iterable<Offer> offers) {
         final Basket basket = new Basket();
         items.forEach(basket::add);
+        offers.forEach(basket::add);
         assertEquals(new BigDecimal(expectedTotal), basket.total());
     }
 
@@ -29,39 +32,59 @@ class BasketTest {
                 aSingleItemPricedPerUnit(),
                 multipleItemsPricedPerUnit(),
                 aSingleItemPricedByWeight(),
-                multipleItemsPricedByWeight()
+                multipleItemsPricedByWeight(),
+                fiveItemsPricedPerUnit()
         );
     }
 
+    private static Arguments fiveItemsPricedPerUnit() {
+        return Arguments.of("5 items, 4 pint of milk along with digestive", "2.53", Arrays.asList(aPintOfMilk("milk"),
+                aPintOfMilk("milk"), aPintOfMilk("milk"), aPintOfMilk("milk"),
+                aPackOfDigestives("digestive")), Collections.singleton(buyOneGetOnePintOfMilk()));
+    }
+
+    private static Offer buyOneGetOnePintOfMilk() {
+        return new BuyOneGetOne(new Product(new BigDecimal("0.49"), "milk").oneOf());
+    }
+
     private static Arguments aSingleItemPricedByWeight() {
-        return Arguments.of("a single weighed item", "1.25", Collections.singleton(twoFiftyGramsOfAmericanSweets()));
+        return Arguments.of("a single weighed item", "1.25", Collections.singleton(twoFiftyGramsOfAmericanSweets()), Collections.emptyList());
     }
 
     private static Arguments multipleItemsPricedByWeight() {
         return Arguments.of("multiple weighed items", "1.85",
-                Arrays.asList(twoFiftyGramsOfAmericanSweets(), twoHundredGramsOfPickAndMix())
+                Arrays.asList(twoFiftyGramsOfAmericanSweets(), twoHundredGramsOfPickAndMix()),
+                Collections.emptyList()
         );
     }
 
     private static Arguments multipleItemsPricedPerUnit() {
         return Arguments.of("multiple items priced per unit", "2.04",
-                Arrays.asList(aPackOfDigestives(), aPintOfMilk()));
+                Arrays.asList(aPackOfDigestives(), aPintOfMilk()), Collections.emptyList());
     }
 
     private static Arguments aSingleItemPricedPerUnit() {
-        return Arguments.of("a single item priced per unit", "0.49", Collections.singleton(aPintOfMilk()));
+        return Arguments.of("a single item priced per unit", "0.49", Collections.singleton(aPintOfMilk()), Collections.emptyList());
     }
 
     private static Arguments noItems() {
-        return Arguments.of("no items", "0.00", Collections.emptyList());
+        return Arguments.of("no items", "0.00", Collections.emptyList(), Collections.emptyList());
     }
 
     private static Item aPintOfMilk() {
         return new Product(new BigDecimal("0.49")).oneOf();
     }
 
+    private static Item aPintOfMilk(String name) {
+        return new Product(new BigDecimal("0.49"), name).oneOf();
+    }
+
     private static Item aPackOfDigestives() {
         return new Product(new BigDecimal("1.55")).oneOf();
+    }
+
+    private static Item aPackOfDigestives(String name) {
+        return new Product(new BigDecimal("1.55"), name).oneOf();
     }
 
     private static WeighedProduct aKiloOfAmericanSweets() {

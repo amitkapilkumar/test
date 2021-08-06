@@ -10,7 +10,13 @@ public class ItemByUnit implements Item {
         this.product = product;
     }
 
+    @Override
     public BigDecimal price() {
         return product.pricePerUnit();
+    }
+
+    @Override
+    public String productName() {
+        return product.name();
     }
 }

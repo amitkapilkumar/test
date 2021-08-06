@@ -1,5 +1,7 @@
 package kata.supermarket;
 
+import kata.supermarket.offers.Offer;
+
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.ArrayList;
@@ -8,13 +10,19 @@ import java.util.List;
 
 public class Basket {
     private final List<Item> items;
+    private final List<Offer> offers;
 
     public Basket() {
         this.items = new ArrayList<>();
+        this.offers = new ArrayList<>();
     }
 
     public void add(final Item item) {
         this.items.add(item);
+    }
+
+    public void add(final Offer offer) {
+        offers.add(offer);
     }
 
     List<Item> items() {
@@ -47,7 +55,11 @@ public class Basket {
          *  which provides that functionality.
          */
         private BigDecimal discounts() {
-            return BigDecimal.ZERO;
+            BigDecimal discount = new BigDecimal("0.00");
+            for(Offer offer : offers) {
+                discount = discount.add(offer.getDiscountedPriceForItems(items()));
+            }
+            return discount.setScale(2, RoundingMode.HALF_UP);
         }
 
         private BigDecimal calculate() {
